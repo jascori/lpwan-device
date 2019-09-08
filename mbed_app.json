@@ -1,0 +1,72 @@
+{
+	"config": {
+        "lora-radio": {
+            "help": "Which radio to use (options: SX1272,SX1276)",
+            "value": "SX1272"
+        },
+        "main_stack_size":     { "value": 4096 },
+ 
+        "lora-spi-mosi":       { "value": "NC" },
+        "lora-spi-miso":       { "value": "NC" },
+        "lora-spi-sclk":       { "value": "NC" },
+        "lora-cs":             { "value": "NC" },
+        "lora-reset":          { "value": "NC" },
+        "lora-dio0":           { "value": "NC" },
+        "lora-dio1":           { "value": "NC" },
+        "lora-dio2":           { "value": "NC" },
+        "lora-dio3":           { "value": "NC" },
+        "lora-dio4":           { "value": "NC" },
+        "lora-dio5":           { "value": "NC" },
+        "lora-rf-switch-ctl1": { "value": "NC" },
+        "lora-rf-switch-ctl2": { "value": "NC" },
+        "lora-txctl":          { "value": "NC" },
+        "lora-rxctl":          { "value": "NC" },
+        "lora-ant-switch":     { "value": "NC" },
+        "lora-pwr-amp-ctl":    { "value": "NC" },
+        "lora-tcxo":           { "value": "NC" }
+    },
+    "target_overrides": {
+	 	"MTS_MDOT_F411RE": {
+            "lora-radio":           "SX1272",
+            "lora-spi-mosi":        "LORA_MOSI",
+            "lora-spi-miso":        "LORA_MISO",
+            "lora-spi-sclk":        "LORA_SCK",
+            "lora-cs":              "LORA_NSS",
+            "lora-reset":           "LORA_RESET",
+            "lora-dio0":            "LORA_DIO0",
+            "lora-dio1":            "LORA_DIO1",
+            "lora-dio2":            "LORA_DIO2",
+            "lora-dio3":            "LORA_DIO3",
+            "lora-dio4":            "LORA_DIO4",
+            "lora-dio5":            "LORA_DIO5",
+            "lora-rf-switch-ctl1":  "NC",
+            "lora-rf-switch-ctl2":  "NC",
+            "lora-txctl":           "LORA_TXCTL",
+            "lora-rxctl":           "LORA_RXCTL",
+            "lora-ant-switch":      "NC",
+            "lora-pwr-amp-ctl":     "NC",
+            "lora-tcxo":            "NC"
+        },
+        "XDOT_L151CC": {
+            "lora-radio":           "SX1272",
+            "lora-spi-mosi":        "LORA_MOSI",
+            "lora-spi-miso":        "LORA_MISO",
+            "lora-spi-sclk":        "LORA_SCK",
+            "lora-cs":              "LORA_NSS",
+            "lora-reset":           "LORA_RESET",
+            "lora-dio0":            "LORA_DIO0",
+            "lora-dio1":            "LORA_DIO1",
+            "lora-dio2":            "LORA_DIO2",
+            "lora-dio3":            "LORA_DIO3",
+            "lora-dio4":            "LORA_DIO4",
+            "lora-dio5":            "NC",
+            "lora-rf-switch-ctl1":  "NC",
+            "lora-rf-switch-ctl2":  "NC",
+            "lora-txctl":           "NC",
+            "lora-rxctl":           "NC",
+            "lora-ant-switch":      "NC",
+            "lora-pwr-amp-ctl":     "NC",
+            "lora-tcxo":            "NC"
+        }
+	}
+}
