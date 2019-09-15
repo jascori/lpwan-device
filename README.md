@@ -7,6 +7,7 @@
 # Commands
 
 ## Shell help
+```bash
 $ help
 ?            display help on given or available commands
 <TAB>        auto-completion
@@ -14,8 +15,10 @@ $ help
 CTRL-P       recall previous input line
 CTRL-N       recall next input line
 <any>        treat as input character
+```
 
 ## Commands help
+```bash
 $ ?
 help   display help
 mem    show free memory
@@ -33,6 +36,7 @@ rxf    set the tx frequency
 rxto   set the rx timeout ms
 rxiq   Invert radio I/Q
 sleep  sleep for a set number of milliseconds
+```
 
 
 # Peer to Peer
