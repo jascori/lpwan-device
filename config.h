@@ -264,15 +264,26 @@ typedef struct {
 } NetworkSession_t;
 
 typedef struct {
-        bool DutyCycleEnabled;
-        uint32_t TxInterval;
+    uint8_t tx_power;
+    uint8_t tx_sf;
+    uint8_t tx_bw;
+    uint32_t tx_freq;
+    bool tx_iqinv;
+    uint32_t tx_timeout;
+
+    uint8_t rx_sf;
+    uint8_t rx_bw;
+    uint32_t rx_freq;
+    uint32_t rx_timeout;
+
+    bool rx_iqinv;
 } ApplicationSettings_t;
 
 typedef struct {
-  ProtectedSettings_t provisioning;
-  NetworkSettings_t settings;
-  NetworkSession_t session;
-  ApplicationSettings_t app_settings;
+    ProtectedSettings_t provisioning;
+    NetworkSettings_t settings;
+    NetworkSession_t session;
+    ApplicationSettings_t app_settings;
 } DeviceConfig_t;
 
 

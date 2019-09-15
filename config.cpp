@@ -604,19 +604,19 @@ bool ConfigManager::ReadFile(spiffs *fs, const char* file, void* dest, uint32_t 
     mutex.lock();
     int ret = SPIFFS_stat(fs, file, &stat);
     if (ret) {
-        printf( "Failed to file in flash.");
+        printf( "Failed to find file in flash.\r\n");
         mutex.unlock();
         return false;
     }
     else if (stat.size != size) {
-        printf( "File from flash wrong size. Expected %lu - Actual %u", size, stat.size);
+        printf( "File from flash wrong size. Expected %lu - Actual %u\r\n", size, stat.size);
         mutex.unlock();
         return false;
     }
 
     int handle = SPIFFS_open(fs, file, SPIFFS_RDWR, 0);
     if (handle < 0) {
-        printf("SPIFFS_open failed %d", SPIFFS_errno(fs));
+        printf("SPIFFS_open failed %d\r\n", SPIFFS_errno(fs));
         mutex.unlock();
         return false;
     }
@@ -628,7 +628,7 @@ bool ConfigManager::ReadFile(spiffs *fs, const char* file, void* dest, uint32_t 
 
             ret = SPIFFS_read(fs, handle, dest, bytes_left);
             if (ret < 0) {
-                printf("SPIFFS_read failed %d", SPIFFS_errno(fs));
+                printf("SPIFFS_read failed %d\r\n", SPIFFS_errno(fs));
                 mutex.unlock();
                 return false;
             }
@@ -650,9 +650,9 @@ void ConfigManager::Load(DeviceConfig_t& dc) {
     if (!ReadFile(&_fs, protected_file, &dc.provisioning, sizeof(dc.provisioning))) {
 #else
     if (xdot_eeprom_read_buf(PROTECTED_ADDR, (uint8_t*)&dc.provisioning, sizeof(dc.provisioning))) {
-        printf("Failed to read protected configuration from EEPROM.");
+        printf("Failed to read protected configuration from EEPROM.\r\n");
 #endif /* TARGET_MTS_MDOT_F411RE */
-        printf("Defaulting protected settings.");
+        printf("Defaulting protected settings.\r\n");
         DefaultProtected(dc);
     }
 
@@ -660,9 +660,9 @@ void ConfigManager::Load(DeviceConfig_t& dc) {
     if (!ReadFile(&_fs, file, &dc.settings, sizeof(dc.settings))) {
 #else
     if (xdot_eeprom_read_buf(SETTINGS_ADDR, (uint8_t*)&dc.settings, sizeof(dc.settings))) {
-        printf("Failed to read configuration from EEPROM.");
+        printf("Failed to read configuration from EEPROM.\r\n");
 #endif /* TARGET_MTS_MDOT_F411RE */
-        printf("Net Settings to defaults.");
+        printf("Net Settings set to defaults.\r\n");
         Default(dc);
     }
 
@@ -670,9 +670,9 @@ void ConfigManager::Load(DeviceConfig_t& dc) {
     if (!ReadFile(&_fs, session_file, &dc.session, sizeof(dc.session))) {
 #else
     if (xdot_eeprom_read_buf(SESSION_ADDR, (uint8_t*)&dc.session, sizeof(dc.session))) {
-        printf("Failed to read session from EEPROM.");
+        printf("Failed to read session from EEPROM.\r\n");
 #endif /* TARGET_MTS_MDOT_F411RE */
-        printf("Session to defaults.");
+        printf("Session set to defaults.\r\n");
         DefaultSession(dc);
     }
 
@@ -680,19 +680,26 @@ void ConfigManager::Load(DeviceConfig_t& dc) {
     if (!ReadFile(&_fs, app_settings_file, &dc.app_settings, sizeof(dc.app_settings))) {
 #else
     if (xdot_eeprom_read_buf(USER_ADDR, (uint8_t*)&dc.app_settings, sizeof(dc.app_settings))) {
-        printf("Failed to read session from EEPROM.");
+        printf("Failed to read session from EEPROM.\r\n");
 #endif /* TARGET_MTS_MDOT_F411RE */
-        printf("App Settings to defaults.");
+        printf("App Settings to defaults.\r\n");
         DefaultSettings(dc);
     }
-
-
-
 }
 
 void ConfigManager::DefaultSettings(DeviceConfig_t& dc) {
-    dc.app_settings.DutyCycleEnabled = MBED_CONF_LORA_DUTY_CYCLE_ON;
-    dc.app_settings.TxInterval = 10000;
+    dc.app_settings.tx_power = 0;
+    dc.app_settings.tx_sf = 7;
+    dc.app_settings.tx_bw = 0;
+    dc.app_settings.tx_freq = 902300000;
+    dc.app_settings.tx_iqinv = false;
+    dc.app_settings.tx_timeout = 3000;
+
+    dc.app_settings.rx_sf = 7;
+    dc.app_settings.rx_bw = 0;
+    dc.app_settings.rx_freq = 902300000;
+    dc.app_settings.rx_timeout = 3000;
+    dc.app_settings.rx_iqinv = false;
 }
 
 void ConfigManager::DefaultSession(DeviceConfig_t& dc) {
