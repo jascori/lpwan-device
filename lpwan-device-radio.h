@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019, Jason Reiss
+ * Copyright (c) 2019, Jason Reiss ( jason.reiss@jascori.com )
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,7 +10,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -25,15 +25,25 @@ namespace LPWAN::Device {
 	class RadioEvents {
 
 	private:
+		uint8_t _buffer[255];
+		uint8_t _size;
+		int16_t _rssi;
+		int16_t _snr;
 		bool _is_transmitting;
+		bool _is_receiving;
 
 	public:
 
 		RadioEvents() :
-			_is_transmitting(false)
+			_is_transmitting(false),
+			_is_receiving(false)
 			{
 
 			}
+
+		bool get_is_idle() {
+			return !(get_is_transmitting() || get_is_receiving());
+		}
 
 		bool get_is_transmitting() {
 			return _is_transmitting;
@@ -42,6 +52,36 @@ namespace LPWAN::Device {
 		void set_is_transmitting(bool val) {
 			_is_transmitting = val;
 		}
+
+		bool get_is_receiving() {
+			return _is_receiving;
+		}
+
+		void set_is_receiving(bool val) {
+			if (val) _size = 0;
+			_is_receiving = val;
+		}
+
+		uint8_t* get_buffer() {
+			return _buffer;
+		}
+
+		void reset_size() {
+			_size = 0;
+		}
+
+		uint8_t get_size() {
+			return _size;
+		}
+
+		int16_t get_rssi() {
+			return _rssi;
+		}
+
+		int16_t get_snr() {
+			return _snr;
+		}
+
 	    /**
 	     * Callback when Transmission is done.
 	     */

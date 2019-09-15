@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019, Jason Reiss
+ * Copyright (c) 2019, Jason Reiss ( jason.reiss@jascori.com )
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,7 +10,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -49,7 +49,11 @@ namespace LPWAN::Device {
 	 */
 	void RadioEvents::rx_done(const uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
 	{
-
+		memcpy(_buffer, payload, size);
+		_size = size;
+		_rssi = rssi;
+		_snr = snr;
+		set_is_receiving(false);
 	}
 
 	/**
@@ -57,6 +61,7 @@ namespace LPWAN::Device {
 	 */
 	void RadioEvents::rx_timeout()
 	{
+		set_is_receiving(false);
 	}
 
 	/**
@@ -64,7 +69,7 @@ namespace LPWAN::Device {
 	 */
 	void RadioEvents::rx_error()
 	{
-
+		set_is_receiving(false);
 	}
 
 	/**

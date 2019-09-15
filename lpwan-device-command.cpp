@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019, Jason Reiss
+ * Copyright (c) 2019, Jason Reiss ( jason.reiss@jascori.com )
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,7 +10,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -30,11 +30,18 @@ char cmd_name_print[] = "print";
 char cmd_name_save[] = "save";
 char cmd_name_reset[] = "reset";
 char cmd_name_send[] = "send";
-char cmd_name_freq[] = "freq";
+char cmd_name_txpow[] = "txp";
+char cmd_name_txf[] = "txf";
 char cmd_name_txsf[] = "txsf";
 char cmd_name_txbw[] = "txbw";
+char cmd_name_tx_iq[] = "txiq";
+char cmd_name_recv[] = "recv";
+char cmd_name_rxf[] = "rxf";
+char cmd_name_rxto[] = "rxto";
+char cmd_name_rxsf[] = "rxsf";
+char cmd_name_rxbw[] = "rxbw";
+char cmd_name_rx_iq[] = "rxiq";
 char cmd_name_sleep[] = "sleep";
-char cmd_name_iqinv[] = "iqinv";
 
 static const char prompt[] = "$ ";
 
@@ -70,6 +77,14 @@ tinysh_cmd_t cmd_send = {  0,
                            0,0,0
                         };
 
+tinysh_cmd_t cmd_txpow = {  0,
+                           cmd_name_txpow,
+                           "set the tx power",
+                           "<power>",
+                           cmd_func_txpow,
+                           0,0,0
+                        };
+
 tinysh_cmd_t cmd_txsf = {  0,
                            cmd_name_txsf,
                            "set the tx spreading factor",
@@ -87,88 +102,77 @@ tinysh_cmd_t cmd_txbw = {  0,
                         };
 
 tinysh_cmd_t cmd_freq = {  0,
-                           cmd_name_freq,
+                           cmd_name_txf,
                            "set the tx frequency",
                            "<frequency>",
-                           cmd_func_freq,
+                           cmd_func_txf,
                            0,0,0
                         };
 
-tinysh_cmd_t cmd_iqinv = { 0,
-                           cmd_name_iqinv,
+tinysh_cmd_t cmd_recv = {  0,
+                           cmd_name_recv,
+                           "recv a packet",
+                           "",
+                           cmd_func_recv,
+                           0,0,0
+                        };
+
+tinysh_cmd_t cmd_rxsf = {  0,
+                           cmd_name_rxsf,
+                           "set the tx spreading factor",
+                           "<spreading factor>",
+                           cmd_func_rxsf,
+                           0,0,0
+                        };
+
+tinysh_cmd_t cmd_rxbw = {  0,
+                           cmd_name_rxbw,
+                           "set the tx bandwidth",
+                           "<bandwidth>",
+                           cmd_func_rxbw,
+                           0,0,0
+                        };
+
+tinysh_cmd_t cmd_rxto = {  0,
+                           cmd_name_rxto,
+                           "set the rx timeout ms",
+                           "<timeout>",
+                           cmd_func_rxto,
+                           0,0,0
+                        };
+
+tinysh_cmd_t cmd_rxf = {  0,
+                           cmd_name_rxf,
+                           "set the tx frequency",
+                           "<frequency>",
+                           cmd_func_rxf,
+                           0,0,0
+                        };
+
+tinysh_cmd_t cmd_tx_iq = { 0,
+                           cmd_name_tx_iq,
                            "Invert radio I/Q",
                            "<enable>",
-                           cmd_func_iqinv,
+                           cmd_func_tx_iq,
                            0,0,0
                         };
 
+tinysh_cmd_t cmd_rx_iq = { 0,
+                           cmd_name_rx_iq,
+                           "Invert radio I/Q",
+                           "<enable>",
+                           cmd_func_rx_iq,
+                           0,0,0
+                        };
 
-
-struct radio_config_t {
-   uint8_t spreading_factor;
-   uint8_t bandwidth;
-   uint32_t frequency;
-   bool iqinv;
-} radio_config;
+ConfigManager config;
+DeviceConfig_t radio_config;
 
 
 SX1272_LoRaRadio* _radio;
 Serial* _pc;
 radio_events_t _radio_events;
-RadioEvents tag_events;
-// SolTagFrame_t _frame;
-
-void tinysh_init(SX1272_LoRaRadio &radio, Serial* pc)
-{
-   _pc = pc;
-
-   radio_config.spreading_factor = 7;
-   radio_config.bandwidth = 0;
-   radio_config.frequency = 902300000;
-   radio_config.iqinv = false;
-
-   // _frame.Header.MsgType = 1;
-   // _frame.Header.Direction = 1;
-   // _frame.OpCode = 4;
-   // _frame.NetworkInfo.ACK = 1;
-
-
-   // _frame.NetworkInfo.SenderAddr = 7;
-   // _frame.NetworkInfo.ReceiverAddr = 5;
-
-   // _frame.NetworkInfo.Network = 3;
-
-   // _frame.NetworkInfo.Network = 3;
-
-
-   // for (size_t i = 0; i < 5; i++) {
-   //    printf("%02X", _frame.Bytes[i]);
-   // }
-
-   _radio_events.rx_done = callback(&tag_events, &RadioEvents::rx_done);
-   _radio_events.tx_done = callback(&tag_events, &RadioEvents::tx_done);
-   _radio_events.tx_timeout = callback(&tag_events, &RadioEvents::tx_timeout);
-   _radio = &radio;
-   _radio->init_radio(&_radio_events);
-   _radio->set_public_network(true);
-
-
-      //set prompt
-    tinysh_set_prompt(prompt);
-
-    //add commands here
-    tinysh_add_command(&cmd_mem);
-    tinysh_add_command(&cmd_print);
-    tinysh_add_command(&cmd_send);
-
-    tinysh_add_command(&cmd_txsf);
-    tinysh_add_command(&cmd_txbw);
-    tinysh_add_command(&cmd_freq);
-    tinysh_add_command(&cmd_sleep);
-    tinysh_add_command(&cmd_iqinv);
-}
-
-
+RadioEvents custom_events;
 
 void error()
 {
@@ -185,6 +189,48 @@ void ok()
 {
     printf("\r\n\nOK\r\n");
 }
+
+void tinysh_init(SX1272_LoRaRadio &radio, Serial* pc)
+{
+   _pc = pc;
+
+   config.Load(radio_config);
+
+   _radio_events.rx_done = callback(&custom_events, &RadioEvents::rx_done);
+   _radio_events.tx_done = callback(&custom_events, &RadioEvents::tx_done);
+   _radio_events.tx_timeout = callback(&custom_events, &RadioEvents::tx_timeout);
+   _radio = &radio;
+   _radio->init_radio(&_radio_events);
+   _radio->set_public_network(true);
+
+   //set prompt
+   tinysh_set_prompt(prompt);
+
+   //add commands here
+   tinysh_add_command(&cmd_mem);
+   tinysh_add_command(&cmd_print);
+   tinysh_add_command(&cmd_send);
+
+   tinysh_add_command(&cmd_txpow);
+   tinysh_add_command(&cmd_txsf);
+   tinysh_add_command(&cmd_txbw);
+   tinysh_add_command(&cmd_freq);
+   tinysh_add_command(&cmd_tx_iq);
+
+   tinysh_add_command(&cmd_recv);
+
+   tinysh_add_command(&cmd_rxsf);
+   tinysh_add_command(&cmd_rxbw);
+   tinysh_add_command(&cmd_rxf);
+   tinysh_add_command(&cmd_rxto);
+   tinysh_add_command(&cmd_rx_iq);
+
+   tinysh_add_command(&cmd_sleep);
+}
+
+
+
+
 
 
 
@@ -246,20 +292,20 @@ void cmd_func_print(int argc, char* argv[]) {
 }
 
 
-void cmd_func_freq(int argc, char* argv[]) {
+void cmd_func_txf(int argc, char* argv[]) {
 
    if (argc == 1) {
       printf("\r\n");
-      printf("%lu", radio_config.frequency);
+      printf("%lu", radio_config.app_settings.tx_freq);
    } else if (argc > 1) {
       int freq = 0;
       if (sscanf(argv[1], "%d", &freq) == 1) {
          if (freq < 902000000 || freq > 928000000) {
-            printf("Unsupported Frequency [902000000:928000000] Hz");
+            printf("Unsupported Frequency [902000000,928000000] Hz");
             error();
             return;
          } else {
-            radio_config.frequency = freq;
+            radio_config.app_settings.tx_freq = freq;
          }
       }
    } else {
@@ -269,11 +315,34 @@ void cmd_func_freq(int argc, char* argv[]) {
    ok();
 }
 
-void cmd_func_iqinv(int argc, char* argv[]) {
+
+void cmd_func_txpow(int argc, char* argv[]) {
 
    if (argc == 1) {
       printf("\r\n");
-      printf("%s", radio_config.iqinv ? "true" : "false");
+      printf("%u", radio_config.app_settings.tx_power);
+   } else if (argc > 1) {
+      int pow = 0;
+      if (sscanf(argv[1], "%d", &pow) == 1) {
+         if (pow < 0 || pow > 20) {
+            printf("Unsupported tx power [0,20]");
+            error();
+            return;
+         } else {
+            radio_config.app_settings.tx_power = pow;
+         }
+      }
+   } else {
+
+   }
+   ok();
+}
+
+void cmd_func_tx_iq(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%s", radio_config.app_settings.tx_iqinv ? "true" : "false");
       ok();
    } else if (argc > 1) {
       if (strncmp(argv[1], "true", 4) != 0 && strncmp(argv[1], "false", 4) != 0) {
@@ -281,7 +350,28 @@ void cmd_func_iqinv(int argc, char* argv[]) {
          error();
          return;
       } else {
-         radio_config.iqinv = (strncmp(argv[1], "true", 4) == 0);
+         radio_config.app_settings.tx_iqinv = (strncmp(argv[1], "true", 4) == 0);
+         ok();
+      }
+   } else {
+
+   }
+}
+
+
+void cmd_func_rx_iq(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%s", radio_config.app_settings.tx_iqinv ? "true" : "false");
+      ok();
+   } else if (argc > 1) {
+      if (strncmp(argv[1], "true", 4) != 0 && strncmp(argv[1], "false", 4) != 0) {
+         printf("Invalid argument (true|false)");
+         error();
+         return;
+      } else {
+         radio_config.app_settings.tx_iqinv = (strncmp(argv[1], "true", 4) == 0);
          ok();
       }
    } else {
@@ -293,16 +383,16 @@ void cmd_func_txsf(int argc, char* argv[]) {
 
    if (argc == 1) {
       printf("\r\n");
-      printf("%u", radio_config.spreading_factor);
+      printf("%u", radio_config.app_settings.tx_sf);
    } else if (argc > 1) {
       int sf = 0;
       if (sscanf(argv[1], "%d", &sf) == 1) {
          if (sf < 7 || sf > 12) {
-            printf("Unsupported Spreading Factor [7:12]");
+            printf("Unsupported Spreading Factor [7,12]");
             error();
             return;
          } else {
-            radio_config.spreading_factor = sf;
+            radio_config.app_settings.tx_sf = sf;
          }
       }
    } else {
@@ -311,18 +401,103 @@ void cmd_func_txsf(int argc, char* argv[]) {
    ok();
 }
 
+
+void cmd_func_rxf(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%lu", radio_config.app_settings.rx_freq);
+   } else if (argc > 1) {
+      int freq = 0;
+      if (sscanf(argv[1], "%d", &freq) == 1) {
+         if (freq < 902000000 || freq > 928000000) {
+            printf("Unsupported Frequency [902000000,928000000] Hz");
+            error();
+            return;
+         } else {
+            radio_config.app_settings.rx_freq = freq;
+         }
+      }
+   } else {
+
+   }
+
+   ok();
+}
+
+
+void cmd_func_rxsf(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%u", radio_config.app_settings.rx_sf);
+   } else if (argc > 1) {
+      int sf = 0;
+      if (sscanf(argv[1], "%d", &sf) == 1) {
+         if (sf < 7 || sf > 12) {
+            printf("Unsupported Spreading Factor [7,12]");
+            error();
+            return;
+         } else {
+            radio_config.app_settings.rx_sf = sf;
+         }
+      }
+   } else {
+
+   }
+   ok();
+}
+
+void cmd_func_rxto(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%lu", radio_config.app_settings.rx_timeout);
+   } else if (argc > 1) {
+      int sf = 0;
+      if (sscanf(argv[1], "%d", &sf) == 1) {
+         radio_config.app_settings.rx_timeout = sf;
+      }
+   } else {
+
+   }
+   ok();
+}
+
+
+
 void cmd_func_txbw(int argc, char* argv[]) {
 
    if (argc == 1) {
       printf("\r\n");
-      printf("%u", ((2 << radio_config.bandwidth) / 2) * 125);
+      printf("%u", (1 << radio_config.app_settings.tx_bw) * 125);
    } else if (argc > 1) {
       if (strcmp(argv[1], "125") == 0) {
-         radio_config.bandwidth = 0;
+         radio_config.app_settings.tx_bw = 0;
       } else if (strcmp(argv[1], "250") == 0) {
-         radio_config.bandwidth = 1;
+         radio_config.app_settings.tx_bw = 1;
       } else if (strcmp(argv[1], "500") == 0) {
-         radio_config.bandwidth = 2;
+         radio_config.app_settings.tx_bw = 2;
+      } else {
+         invalid_args();
+         return;
+      }
+   }
+   ok();
+}
+
+void cmd_func_rxbw(int argc, char* argv[]) {
+
+   if (argc == 1) {
+      printf("\r\n");
+      printf("%u", (1 << radio_config.app_settings.rx_bw) * 125);
+   } else if (argc > 1) {
+      if (strcmp(argv[1], "125") == 0) {
+         radio_config.app_settings.rx_bw = 0;
+      } else if (strcmp(argv[1], "250") == 0) {
+         radio_config.app_settings.rx_bw = 1;
+      } else if (strcmp(argv[1], "500") == 0) {
+         radio_config.app_settings.rx_bw = 2;
       } else {
          invalid_args();
          return;
@@ -333,25 +508,17 @@ void cmd_func_txbw(int argc, char* argv[]) {
 
 void cmd_func_send(int argc, char* argv[]) {
 
-   if (tag_events.get_is_transmitting()) {
+   if (!custom_events.get_is_idle()) {
       printf("\r\n");
-      printf("Radio is transmitting");
+      printf("Radio is not idle");
       error();
       return;
    }
 
-   tag_events.set_is_transmitting(true);
+   custom_events.set_is_transmitting(true);
 
-   _radio->set_channel(radio_config.frequency);
+   _radio->set_channel(radio_config.app_settings.tx_freq);
 
-   _radio->set_tx_config(MODEM_LORA, 20, 0, radio_config.bandwidth, radio_config.spreading_factor, 1, 8, false, true, false, 0, radio_config.iqinv, 2000);
-
-   // printf(" len: %d\r\n", sizeof(SolTagFrame_t));
-
-   _radio->send((uint8_t*)&argv[1], strlen(argv[1]));
-
-   ok();
-}
 
 
 /**
@@ -389,6 +556,43 @@ void cmd_func_send(int argc, char* argv[]) {
                                bool fix_len, bool crc_on, bool freq_hop_on,
                                uint8_t hop_period, bool iq_inverted, uint32_t timeout) = 0;
     */
+
+   // printf("tx conf: bw: %u sf: %u iq: %d\r\n", radio_config.app_settings.tx_bw,radio_config.app_settings.tx_sf,radio_config.app_settings.tx_iqinv);
+
+   _radio->set_tx_config(MODEM_LORA,
+      radio_config.app_settings.tx_power,
+      0,
+      radio_config.app_settings.tx_bw,
+      radio_config.app_settings.tx_sf,
+      1,
+      8,
+      false,
+      false,
+      false,
+      0,
+      radio_config.app_settings.tx_iqinv,
+      radio_config.app_settings.tx_timeout);
+
+   _radio->send((uint8_t*)&argv[1][0], strlen(&argv[1][0]));
+
+   ok();
+}
+
+
+void cmd_func_recv(int argc, char* argv[]) {
+
+   if (!custom_events.get_is_idle()) {
+      printf("\r\n");
+      printf("Radio is not idle");
+      error();
+      return;
+   }
+
+   custom_events.set_is_receiving(true);
+
+   _radio->set_channel(radio_config.app_settings.rx_freq);
+
+
 
 /**
      *  Sets reception parameters.
@@ -433,5 +637,49 @@ void cmd_func_send(int argc, char* argv[]) {
                                bool crc_on, bool freq_hop_on, uint8_t hop_period,
                                bool iq_inverted, bool rx_continuous) = 0;
    */
+
+   // printf("rx conf: bw: %u sf: %u iq: %d\r\n", radio_config.app_settings.rx_bw,radio_config.app_settings.rx_sf,radio_config.app_settings.rx_iqinv);
+
+   _radio->set_rx_config(MODEM_LORA,
+      radio_config.app_settings.rx_bw,
+      radio_config.app_settings.rx_sf,
+      1,
+      0,
+      8,
+      50,
+      false,
+      0,
+      false,
+      false,
+      0,
+      radio_config.app_settings.rx_iqinv,
+      true);
+
+   _radio->receive();
+
+   Timer tm;
+   tm.start();
+
+   printf("\r\n");
+
+   while(tm.read_ms() < (int)radio_config.app_settings.rx_timeout) {
+
+      if (custom_events.get_size() > 0) {
+         printf("%u ", custom_events.get_size());
+         for (size_t i = 0; i < custom_events.get_size(); ++i)
+            printf("%c", custom_events.get_buffer()[i]);
+         printf("\r\n");
+         custom_events.reset_size();
+      }
+
+      wait_ms(10);
+   }
+
+   custom_events.set_is_receiving(false);
+
+   ok();
+}
+
+
 
 }
